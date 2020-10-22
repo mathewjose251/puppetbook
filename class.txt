@@ -1,0 +1,211 @@
+" Separating Data from Puppet Code :Introducing Hiera "
+---------------------------------
+Polls >
+What you like in Puppet
+
+What is happening in puppet run in a system.
+
+How difficult is hiera
+
+Tell me a use case  where you can benefit from hiera.
+---------------------------------
+Puppet models everything —
+the node’s current state, the desired end state, and the actions needed to move from one to the other — as data.
+Each agent “receives a catalog of resources and relationships,
+compares it to the current system state, and makes changes as
+needed to bring the system into compliance.”
+
+ agenda today.
+
+
+A) What is it ?
+
+B) Brief History of Hiera ..
+
+
+C) Getting started with Hiera
+
+  The basic concepts and tasks to get you started with Hiera,
+  including how to create a hiera.yaml config file and write data.
+  It is the foundation for understanding the more advanced topics
+   in the rest of the Hiera discussion .
+
+ D) Configuring Hiera
+  The Hiera configuration file is called hiera.yaml.
+  It configures the hierarchy for a given layer of data.
+
+   Creating and editing data
+
+  Important aspects of using Hiera are merge behavior and interpolation.
+
+E) Looking up data with Hiera
+
+F) Testing data lookups
+------------
+What is not covered today
+------------
+how to use hiera in Global /environment layer
+Writing new data backends ( such as use hiera to connect to a DB and select the data)
+
+You can extend Hiera to look up values in data sources,
+ for example, a PostgreSQL database table, a custom web app, or a new kind of structured data file.
+==============
+
+
+ the primary value that Hiera provides is the ability to separate the code
+  for “how to configure the /etc/ntp.conf”
+  from the values that define “what ntp servers each node should use.”
+   In short, Hiera lets you separate the “how” from the “what.”
+
+Introduction
+
+Hiera
+When writing infrastructure as code,
+ Hiera allows us to separate the what from the who.
+ Separate the settings from the way the settings are applied.
+   This data is kept in a simple, pluggable hierarchical database.
+Hiera can search through all the tiers in this hierarchy and merge the result into a single array.
+    This enables you to keep site-specific data out of your manifests.
+    This, in turn, makes your Puppet modules much more portable.
+    Typically, Hiera data sources are written in easy-to-read YAML.
+
+Hiera’s typical hierarchical lookup uses a “defaults, with overrides” pattern.
+    This means you specify default common data once, then override it when the default won’t work.
+    Hiera uses Puppet’s facts to specify data sources, so you can structure your overrides in whatever makes sense for your infrastructure.
+
+    Hiera is a built-in key-value configuration data lookup system,
+     used for separating data from Puppet code.
+
+ The default language for Hiera is YAML. YAML is a simple way to describe the data.
+
+making it possible to use the same generic code over and over again.
+
+ Eighty percent of the puppet code most organizations use tends to be generic; only the data varies.
+
+History of Hiera
+============
+
+About Hiera
+Puppet’s strength is in reusable code.
+Code that serves many needs must be configurable:
+put site-specific information in external configuration data files,
+rather than in the code itself.
+
+Hiera 5 ===New version
+
+The program’s biggest new feature is its independent hierarchy configurations for each environment and module.
+This means:
+Your main Hiera data and its configuration now coexist.
+ This means making changes to the hierarchy is as safe and testable as any other change to your code or data.
+
+Module authors can use the power of Hiera to set default values for their modules,
+and users can override defaults without worrying over implementation details.
+
+---
+
+
+version5 -- Lookup options (in puppet) developed in 2017
+Trace can be done >> How its does its merges
+
+Lookup --explain (need to verify)
+
+
+New ways of describing paths to
+ data
+
+options assocaited with data
+h5> new ways of describing paths in your YAML
+
+new feature
+ glob ( ) >> pattern for files if you dont know the file count or name
+mapped paths >>> use a fact based paths
+
+=========
+explicit lookups
+>>
+a= lookup('key')
+
+a= lookup('key',Array) ( I want a key value which is from an array)
+a= lookup('key',Array,first,[blue]) ( I want a key value which is an array,use first found strategy and if you cant find anything ,use default as blue)
+use case >> yum repos>>
+
+many lookup options
+
+Value_type
+merge
+default_value >> if not found use this
+default_value_hash >> if not found pick lookup here
+overide look here first
+
+---------
+merge behaviour
+
+first >> the first found value
+Unique >> For Array
+hash >> merge hash,highest prioroty key  wins first,No recursive,
+deep >> merge hash,highest prioroty key  wins on conflicts,recursive, and arrays made Unique
+deep have options>>
+Automatic Paramaeter lookup>>>Pulling values
+Explicit lookup >>
+
+
+Where to look data
+
+Layers of data
+
+1_ GOLBAL >> YOU override all the other layers
+2_ Environmental ( hiera.yaml) >> available all the modules in the environment >>Overide the module level settings>> multi dimensional way of using environments
+3_ Module >>Only keys for modules namespace>>
+------------
+Merge Behaviours >>Important
+
+
+https://puppet.com/docs/puppet/6.19/hiera_merging.html#merge_behaviors
+
+example how it s done in the puppet code
+
+https://github.com/puppetlabs/puppet/blob/master/lib/puppet/functions/eyaml_lookup_key.rb
+
+https://github.com/puppetlabs/puppet/blob/eadd5474c26e7d28d90de00b9d7a7545ac10e55d/lib/hiera/puppet_function.rb
+
+============
+
+https://puppet.com/docs/puppet/6.19/hiera_automatic.html
+==============
+
+Advanced use cases
+
+
+https://puppet.com/blog/hiera-data-generation-swisscom/
+
+
+https://www.hashicorp.com/blog/[post]?post=how-to-use-vault-with-hiera-5-for-secret-management
+---------
+Testing Hiera data on the command line
+
+As you set Hiera data or rearrange your hierarchy,
+It is important to double-check the data a node receives.
+
+The puppet lookup command helps test data interactively.
+The lookup command is a CLI for Puppet's 'lookup()' function. It searches your Hiera data and returns a value for the requested lookup key,
+so you can test and explore your data. It is a modern replacement for the 'hiera' command.
+If you're debugging your Hiera data and want to see where values are coming from, use the '--explain' option.
+
+If '--explain' isn't specified, lookup exits with 0 if a value was found and 1 otherwise. With '--explain', lookup always exits with 0 unless there is a major error.
+
+You can provide multiple lookup keys to this command, but it only returns a value for the first found key, omitting the rest.
+
+For
+ For example:
+ 
+ demo
+ 
+ o use the puppet lookup command effectively:
+
+Run the command on a Puppet Server node, or on another node that has access to a full copy of your Puppet code and configuration.
+The node you are testing against should have contacted the server at least one time as this makes the facts for that node available to the lookup command (otherwise you need to supply the facts yourself on the command line).
+Make sure the command uses the global confdir and codedir, so it has access to your live data. If you’re not running puppet lookup as root user, specify --codedir and --confdir on the command line.
+If you use PuppetDB, you can use any node’s facts in a lookup by specifying --node <NAME>. Hiera can automatically get that node’s real facts and use them to resolve data.
+If you do not use PuppetDB, or if you want to test for a set of facts that don't exist, provide facts in a YAML or JSON file and specify that file as part of the command with --facts <FILE>. To get a file full of facts, rather than creating one from scratch, run facter -p --json > facts.json on a node that is similar to the node you want to examine, copy the facts.json file to your Puppet Server node, and edit it as needed.
+Puppet Development Kit comes with predefined fact sets for a variety of platforms. You can use those if you want to test against platforms you do not have, or if you want "typical facts" for a kind of platform.
+If you are not getting the values you expect, try re-running the command with --explain. The --explain flag makes Hiera output a full explanation of which data sources it searched and what it found in them.
