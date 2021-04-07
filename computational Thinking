@@ -9,3 +9,14 @@ tational thinking provides the foundation for learning how to translate any real
 
 world problem into a computer program or system through the use of algorithms,
 languages and coding.
+====================================================
+case for OS version
+
+case $facts['os']['release']['major'] {
+        '5':         { } # This module does not manage RHEL5 repos
+
+        '6','7','8': { include mod::repos }
+
+        default:     { fail("Unknown release: ${facts['os']['release']['major']}") }
+    }
+Conditional statements in the Puppet DSL (such as if, unless, case, and the selector operator) allow you to assign a variable once, but assign it differently based on a specific condition. Using the previous example of Puppet’s configuration directory, let’s see how that would be assigned differently, based on the system’s kernel fact:
