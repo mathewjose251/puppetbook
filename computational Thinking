@@ -20,3 +20,16 @@ case $facts['os']['release']['major'] {
         default:     { fail("Unknown release: ${facts['os']['release']['major']}") }
     }
 Conditional statements in the Puppet DSL (such as if, unless, case, and the selector operator) allow you to assign a variable once, but assign it differently based on a specific condition. Using the previous example of Puppet’s configuration directory, let’s see how that would be assigned differently, based on the system’s kernel fact:
+
+------------
+---facter ssh_keys---
+
+
+Facter.add(:ssh_host_keys) do
+  confine kernel: ['AIX', 'SunOS','Linux']
+  confine { File.directory?('/etc/ssh') }
+  setcode do
+    ssh_key_list = Dir["/etc/ssh/**/ssh_host*key.*"] + Dir["/etc/ssh/**/ssh_host*key"]
+    ssh_key_list
+  end
+end
